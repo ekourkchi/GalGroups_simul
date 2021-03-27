@@ -224,7 +224,7 @@ if __name__ == '__main__':
     
     
     ##################################################
-    table = np.genfromtxt('all.iter.2.v41.group' , delimiter='|', filling_values=0, names=True, dtype=None)
+    table = np.genfromtxt('all.iter.2.v44.group' , delimiter='|', filling_values=0, names=True, dtype=None)
     flag   =  table['flag']
     Mv_lum =  table['Mv_lum']
     dcf2 =  table['dcf2']
@@ -360,7 +360,7 @@ if __name__ == '__main__':
     
     
     
-    plt.title('all.iter.2.v41.group + new curved M/L ratio')
+    plt.title('all.iter.2.v44.group + new curved M/L ratio')
     plt.xlabel('Group Mass [M'+r'$_\odot$'+']')
     plt.ylim(0.15,1.E6)
     plt.xlim(1.E9,1.E16)

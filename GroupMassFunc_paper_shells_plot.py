@@ -184,7 +184,7 @@ def xi2_tail(M_func, m0,n00, n00_err):
 ##################################################################
 def calcMassFunc(Mv_lum, dist, plot=False):
     
-    M_bins = np.logspace(10,14,14)
+    M_bins = np.logspace(10,14,20)
     M_bins = np.append(M_bins, [1.E15])
     Nbins = len(M_bins)
 
@@ -192,18 +192,18 @@ def calcMassFunc(Mv_lum, dist, plot=False):
     
     m0,n0, nerr0 = plot_shell(Mv_lum, dist, M_bins, d_min=20, d_max=40)
     for i in [0,1,2]: n0[i]=0;nerr0[i]=0
-    #if plot: plt.errorbar(m0,n0,yerr=nerr0, fmt='.', color='red')
+    if plot: plt.errorbar(m0,n0,yerr=nerr0, fmt='.', color='red')
     
     m1,n1, nerr1 = plot_shell(Mv_lum, dist, M_bins, d_max=6)
-    #if plot: plt.errorbar(m1,n1,yerr=nerr1, fmt='.', color='black')
+    if plot: plt.errorbar(m1,n1,yerr=nerr1, fmt='.', color='black')
     
     m2,n2, nerr2 = plot_shell(Mv_lum, dist, M_bins, d_min=6, d_max=10)
     for i in [0,1]: n2[i]=0;nerr2[i]=0
-    #if plot: plt.errorbar(m2,n2,yerr=nerr2, fmt='.', color='blue')
+    if plot: plt.errorbar(m2,n2,yerr=nerr2, fmt='.', color='blue')
     
     m3,n3, nerr3 = plot_shell(Mv_lum, dist, M_bins, d_min=10, d_max=20)
     for i in [0,1]: n3[i]=0;nerr3[i]=0
-    #if plot: plt.errorbar(m3,n3,yerr=nerr3, fmt='.', color='green')
+    if plot: plt.errorbar(m3,n3,yerr=nerr3, fmt='.', color='green')
      
     
     N1=0; N0=0
@@ -268,7 +268,7 @@ def calcMassFunc(Mv_lum, dist, plot=False):
         else:
             n00[i] = 0    
     
-    #plt.errorbar(m0,n00*4,yerr=n00_err*4 ,fmt='.', color='magenta')  
+    plt.errorbar(m0,n00*4,yerr=n00_err*4 ,fmt='.', color='magenta')  
     
     alf = xi2(M_func, m0,n00, n00_err)
     #alf = 16.0
@@ -277,7 +277,7 @@ def calcMassFunc(Mv_lum, dist, plot=False):
         #m0 = m0[3:]
         #n00 = n00[3:]
         #n00_err = n00_err[3:]
-        plt.errorbar(m0,n00*alf,yerr=n00_err*alf , fmt='.', color='blue')
+        plt.errorbar(m0,n00*alf,yerr=n00_err*alf , fmt='.', color='red')
         line1, = plt.plot(m0,n00*alf, '.', color='blue', label='KT2017 M/L')
         plt.legend(handles=[line1], loc=1)
     
@@ -518,7 +518,7 @@ if __name__ == '__main__':
     #plt.plot(10**logMass, 10**nl20, 'r--')
     plt.plot(10**logMass, 10**(nl20+0.662), '--', color='black')
     
-    M_func = interpolate.interp1d(10**logMass, 10**(nl20+0.662))
+    #M_func = interpolate.interp1d(10**logMass, 10**(nl20+0.662))
    
     
     ##################################################
