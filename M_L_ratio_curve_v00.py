@@ -76,9 +76,9 @@ def Mass2(L_k):
   L = L_k / 1.E10
   
 
-  if L < 4.423:
-    MtoL = 32.0*(L**-0.7)
-  elif L >= 4.423:
+  if L < 1:
+    MtoL = 32.*(L**-0.7)
+  elif L >= 1:
     MtoL = 32*(L**0.15)
   
 
@@ -119,8 +119,34 @@ def median(target, array, mi, mf):
     f1[np.where(array>=mi)] = 1
     f2[np.where(array<mf)] = 1
     f = f1 + f2
+    
+    ML = target[np.where(f==2)]
+    media = np.median(ML)
+    stdev = np.std(ML)
+    
+    N = len(ML)
+    f1 = np.zeros(N)
+    f2 = np.zeros(N)
+    f1[np.where(ML<=media+2*stdev)] = 1
+    f2[np.where(ML>=media-2*stdev)] = 1
+    f = f1 + f2    
+    ML = ML[np.where(f==2)]
+    media = np.median(ML)
+    stdev = np.std(ML)        
 
-    return np.median(target[np.where(f==2)])
+    N = len(ML)
+    f1 = np.zeros(N)
+    f2 = np.zeros(N)
+    f1[np.where(ML<=media+3*stdev)] = 1
+    f2[np.where(ML>=media-3*stdev)] = 1
+    f = f1 + f2    
+    ML = ML[np.where(f==2)]
+    media = np.median(ML)
+    stdev = np.std(ML)   
+
+    
+
+    return media, stdev
 #################################################################
 
 if __name__ == '__main__':
@@ -160,7 +186,7 @@ if __name__ == '__main__':
             #M_halo[i]=Mv_lum[i]
             L_halo[i]=10**logK[i]
           
-  #ax.plot(L_halo,M_halo/L_halo, 'g.')
+  ax.plot(L_halo,M_halo/L_halo, '.', markersize=1, color='black', alpha=0.1)
   
   
   M2L_halo = M_halo/L_halo
@@ -173,18 +199,23 @@ if __name__ == '__main__':
     
   x = []
   y = []
+  y_err = []
     
   while m0<1.E14:
         
         m1 = m0*alfa 
-        y.append(median(M2L_halo, L_halo, m0, m1))
+        med, stdev = median(M2L_halo, L_halo, m0, m1)
+        y.append(med)
+        y_err.append(stdev)
         x.append(sqrt(m0*m1))
         m0 = m1
         if m0>1.E11: alfa=2.5
   
   x = np.asarray(x)
   y = np.asarray(y)
-  #ax.plot(x/2,y*4, 'go')
+  y_err = np.asarray(y_err)
+  #ax.plot(x,y*3, 'g*')
+  plt.errorbar(x,y*3.5, yerr=y_err, fmt='*', color='brown')
   
   MtoL_mod = interpolate.interp1d(x/2, y*4)
   
@@ -198,15 +229,10 @@ if __name__ == '__main__':
   
   
   #ax.plot(L, MtoL, 'g-')  
-  ax.plot(L, MtoL_test, 'b--') 
+  #ax.plot(L, MtoL_test, 'b--') 
 
 
 
-
-
-
-
-  
   L = [1.E5, 1.E7, 5.E7,1.E8, 9.27E8, 5.E9, 1.E10, 4.423E10, 1.E12, 1.E15] 
   M = Mass_lst(L)
   M2 = Mass2_lst(L)
@@ -215,12 +241,77 @@ if __name__ == '__main__':
   L  = np.asarray(L)
   M  = np.asarray(M)
   M2 = np.asarray(M2)
-  #ax.plot(L, M/L, 'r-o')
-  #ax.plot(L, M2/L, 'b-.')
+  ax.plot(L, M/L, 'r-o')
+  ax.plot(L, M2/L, '--', color='orange')
   
+  ######################################
+  #def L_015(L_k):
+      #L = L_k / 1.E10
+      #return 32*(L**0.15)
+  
+  #def MtoLrand():
+      
+      
+      #slopes = np.arange(0.15,-1.01,-0.01)
+      #L = 1E13
+      #L_lst = []
+      #M2L_lst = []
+      #while L>= 9.E6:
+          
+          #if L>= 9.E10:
+              #M2L_ = L_015(L)
+          #else:
+              #p = random.randint(0,116)
+              #alfa = slopes[p]
+              #M2L_ = (M2L_/L_**alfa)*L**alfa
+
+          #M2L_lst.append(M2L_)
+          #L_lst.append(L)
+          #L_ = L
+          #L = L/sqrt(10)
+              
+      #return L_lst, M2L_lst    
+          
+  
+  #L_lst, M2L_lst = MtoLrand()
+  #ax.plot(L_lst, M2L_lst, 'g-o')  
+     
+    
+      
+  def myM2L_(L_k, alfa):
+      
+      
+       L = L_k / 1.E10
+       if L>=1: 
+           return 32.*(L**0.15)
+       else:
+           return 32.*(L**alfa)
+    
+  def myM2L__(alfa):
+      
+       L_lst = [1.E13, 4.423E10, 9E8, 1.E7]
+       M2L_lst = [myM2L_(1.E13, alfa), myM2L_(4.423E10, alfa), myM2L_(9E8, alfa), myM2L_(1.E7, alfa)]
+       
+       L_lst = np.asarray(L_lst)
+       M2L_lst = np.asarray(M2L_lst)
+      
+       myM2L = interpolate.interp1d(np.log10(L_lst), np.log10(M2L_lst))
+       
+       return myM2L      
+      
+  f =  myM2L__(-0.9393)
+  Lbin = np.logspace(7,13,50)
+  Mbin = np.logspace(7,13,50)
+  for i in range(len(Lbin)):
+      Mbin[i] = 10**f(np.log10(Lbin[i]))
+ 
+  
+  ax.plot(Lbin, Mbin, '.')  
+  
+  
+  #######################################
   
 
-  
   
   ax.set_ylabel('M'+r'$_v$'+r'$^{exp}$'+'/L'+r'$_{K_s}$'+' ['+r'$M_\odot/L_\odot$'+']', fontsize=16)
   ax.set_xlabel('K'+r'$_s$'+'-band Luminosity ['+r'$L_\odot$'+']', fontsize=16)
@@ -232,14 +323,14 @@ if __name__ == '__main__':
   plt.yticks(fontsize=16)
   plt.xticks(fontsize=16)
 
-  ax.annotate(r'$L^{-0.5}$', (3.E7, 141), rotation=0, color='black', size=18)
-  ax.annotate(r'$L^{0.15}$', (4.5E11, 35), rotation=0, color='black', size=18)
+  #ax.annotate(r'$L^{-0.5}$', (3.E7, 141), rotation=0, color='black', size=18)
+  ax.annotate(r'$L^{0.15}$', (4.5E11, 100), rotation=0, color='black', size=18)
   
-  ax.annotate(r'$L^{-0.7}$', (2.E8, 800), rotation=0, color='blue', size=18)
+  ax.annotate(r'$L^{-0.7}$', (2.E8, 800), rotation=0, color='orange', size=18)
   
   plt.xscale('log')
   plt.yscale('log')
-  plt.xlim(1.E6,1.E13)
+  plt.xlim(1.E7,1.E13)
   plt.ylim(1,1.E4)
 
   
@@ -247,9 +338,4 @@ if __name__ == '__main__':
   
   plt.show()
   
-  
-  
-  
-  
-  
-  
+

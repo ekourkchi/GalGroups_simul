@@ -1,0 +1,40 @@
+import sys
+import os
+import random
+import matplotlib.pyplot as plt
+from matplotlib import rc, rcParams
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+import numpy as np
+from math import *
+from time import time
+import random
+from astropy.io import ascii
+from astropy.table import Table, Column 
+from scipy  import interpolate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  plt.xscale('log')
+  plt.yscale('log')
+  plt.xlim(1.E6,1.E13)
+  plt.ylim(1,1.E4)
+
+  
+  
+  
+  plt.show()

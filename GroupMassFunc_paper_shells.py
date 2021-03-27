@@ -14,7 +14,27 @@ from scipy  import interpolate
 
 
 #################################################################
+#################################################################
 
+# Returns mass in solar unit, given the absolute K-band luminosity
+def Mass2(L_k):
+
+  L = L_k / 1.E10
+  
+
+  if L <1:
+    MtoL = 32.0*(L**-0.60)
+  elif L >= 1:
+    MtoL = 32*(L**0.15)
+  
+
+  
+  
+  Mass_out = L_k * MtoL
+  
+  return Mass_out
+
+#################################################################
 
 # Returns mass in solar unit, given the absolute K-band luminosity
 def Mass_brent(L_k):
@@ -103,12 +123,64 @@ def plot_shell(Mv_lum, dist, M_bins, d_min=None, d_max=None, color=None, plot=Fa
       plt.errorbar(m_lst,1.*n_lst, yerr=np.sqrt(n_lst), fmt='.', color=color)    
     
     return m_lst, n_lst, np.sqrt(n_lst)
+#################################################################
+def xi2(M_func, m0,n00, n00_err):
+    
+    xi2_min = 1.E12
+    alf = 0
+    for alfa in np.arange(0,30,0.1):
+        xi2 = 0
+        for i in range(len(m0)):
+           if m0[i] > 4.5E12 and m0[i] <1.E14:
+               xi2 += ((alfa*n00[i]-M_func(m0[i]))/(alfa*n00_err[i]))**2
+        if xi2<xi2_min:
+            alf = alfa
+            xi2_min = xi2
+        print  alfa, xi2
+    return alf
+##################################################################
+################################################################
+#################################################################
+def L_015(L_k):
+      L = L_k / 1.E10
+      return 32*(L**0.15)
+  
+def MtoLrand():
+      
+      
+      slopes = np.arange(0.15,-1.01,-0.01)
+      L = 1E13
+      L_lst = []
+      M2L_lst = []
+      while L>= 9.E6:
+          
+          if L>= 9.E10:
+              M2L_ = L_015(L)
+          else:
+              p = random.randint(0,116)
+              alfa = slopes[p]
+              M2L_ = (M2L_/L_**alfa)*L**alfa
 
-
+          M2L_lst.append(M2L_)
+          L_lst.append(L)
+          L_ = L
+          L = L/sqrt(10)
+      
+      myM2L = interpolate.interp1d(L_lst, M2L_lst)
+      
+      return  myM2L
+            
 #################################################################
 
 if __name__ == '__main__':
     
+    ##################################################
+    table = np.genfromtxt('MW_17ST_H100.csv' , delimiter=',', filling_values=0, names=True, dtype=None)
+    logMass = table['logMass']
+    nl20 = table['nl20']
+    
+    
+    ##################################################
     fig = plt.figure(figsize=(5,5), dpi=100)
     ax = fig.add_subplot()
     
@@ -126,10 +198,14 @@ if __name__ == '__main__':
     plt.errorbar(10**logM, 10**logN, yerr=10**logNerr , fmt='.', color='black')
     plt.errorbar(10**logMb, 5*10**logNb, yerr=5*10**logNerrb ,  fmt='.', color='black')
     
+    #plt.plot(10**logMass, 10**nl20, 'r--')
+    plt.plot(10**logMass, 10**(nl20+0.662), '--', color='black')
     
+    M_func = interpolate.interp1d(10**logMass, 10**(nl20+0.662))
+   
     
     ##################################################
-    table = np.genfromtxt('all.iter.2.v41.group' , delimiter='|', filling_values=0, names=True, dtype=None)
+    table = np.genfromtxt('all.iter.2.v44.group' , delimiter='|', filling_values=0, names=True, dtype=None)
     flag   =  table['flag']
     Mv_lum =  table['Mv_lum']
     dcf2 =  table['dcf2']
@@ -141,22 +217,14 @@ if __name__ == '__main__':
     
     N = len(flag)
     dist = np.zeros(N)
-    
-    
-    #for i in range(N):
-       #Mv_lum[i] = Mass_brent(10**logK[i])
-    
-                    
+
     for i in range(N):
         if flag[i] ==2:
             dist[i] = mDist[i]
         else:
             dist[i] = dcf2[i]
-        
-        
 
-
-   
+    
     for i in range(N):
        if dist[i]==0:
            dist[i] = Vls[i]/75.
@@ -164,10 +232,35 @@ if __name__ == '__main__':
     
     indices = np.where(flag!=1)
     Mv_lum = Mv_lum[indices]
-    dist   = dist[indices]    
+    logK = logK[indices]
+    dist   = dist[indices] 
+
+    indices = np.where(logK>7)
+    Mv_lum = Mv_lum[indices]
+    logK = logK[indices]
+    dist   = dist[indices] 
+    
+    N = len(logK)
+    
+    #for i in range(N):
+       #Mv_lum[i] = Mass_brent(10**logK[i])
+
+    
+    myM2L = MtoLrand()
+    for i in range(N):
+       Mv_lum[i] = myM2L(10**logK[i])*(10**logK[i])
+    
+                    
+
+        
+        
+
+
+   
+  
     
     
-    M_bins = np.logspace(10,14,20)
+    M_bins = np.logspace(10,14,15)
     M_bins = np.append(M_bins, [1.E15])
     Nbins = len(M_bins)
 
@@ -253,8 +346,16 @@ if __name__ == '__main__':
     
     
        
-    plt.errorbar(m0,n00*4,yerr=n00_err*4 ,fmt='.', color='magenta')  
-    plt.errorbar(m0,n00*4*5.5,yerr=n00_err*4*5.5 , fmt='.', color='red')
+    #plt.errorbar(m0,n00*4,yerr=n00_err*4 ,fmt='.', color='magenta')  
+    
+    #alf = xi2(M_func, m0,n00, n00_err)
+    alf = 16.0
+    #print "results: ", alf
+    plt.errorbar(m0,n00*alf,yerr=n00_err*alf , fmt='.', color='magenta')
+    
+    
+    
+    
     ##################################################
     
     
@@ -265,7 +366,7 @@ if __name__ == '__main__':
     
     
     
-    plt.title('all.iter.2.v41.group + new curved M/L ratio')
+    plt.title('all.iter.2.v44.group + new curved M/L ratio')
     plt.xlabel('Group Mass [M'+r'$_\odot$'+']')
     plt.ylim(0.15,1.E6)
     plt.xlim(1.E9,1.E16)

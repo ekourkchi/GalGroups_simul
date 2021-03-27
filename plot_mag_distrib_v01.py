@@ -56,11 +56,11 @@ if __name__ == '__main__':
     MagK = MagK[indices]
     dist   = dist[indices]
     
-    indices = np.where(dist>=5)
+    indices = np.where(dist>=20)
     MagK = MagK[indices]
     dist   = dist[indices]    
     
-    indices = np.where(dist<25)
+    indices = np.where(dist<30)
     MagK = MagK[indices]
     dist   = dist[indices]      
     
@@ -102,11 +102,11 @@ if __name__ == '__main__':
     MagK = MagK[indices]
     dist   = dist[indices]
     
-    indices = np.where(dist>=5)
+    indices = np.where(dist>=20)
     MagK = MagK[indices]
     dist   = dist[indices]    
     
-    indices = np.where(dist<25)
+    indices = np.where(dist<30)
     MagK = MagK[indices]
     dist   = dist[indices]      
     
@@ -134,7 +134,7 @@ if __name__ == '__main__':
    
     
     
-    plt.title('5-25 Mpc')
+    plt.title('20-30 Mpc')
     plt.xlabel('Mag K [mag]')
     plt.ylabel('Number')
     #plt.xscale('log')
